@@ -7,4 +7,5 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/rs/zerolog v1.26.1
+	go.mongodb.org/mongo-driver v1.8.4
 )

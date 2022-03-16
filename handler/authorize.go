@@ -2,6 +2,6 @@ package handler
 
 import "net/http"
 
-func Authorize(w http.ResponseWriter, req *http.Request) {
+func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
 
 }
