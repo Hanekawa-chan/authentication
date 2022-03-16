@@ -16,20 +16,26 @@ const port = ":8080"
 func main() {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		log.Fatal().Err(err).Msg("error connecting db")
+		log.Fatal().Err(err).Msg("connect db")
 	}
 	defer func() {
 		if err = client.Disconnect(context.TODO()); err != nil {
-			log.Fatal().Err(err).Msg("error disconnecting db")
+			log.Fatal().Err(err).Msg("disconnect db")
 		}
 	}()
+
 	authDao := dao.New(client)
 
-	h := handler.NewAuthHandler(authDao)
+	generator, err := handler.New("pass")
+	if err != nil {
+		log.Fatal().Err(err).Msg("create jwt generator")
+	}
+
+	h := handler.NewAuthHandler(authDao, generator)
 
 	log.Log().Msg("server started on " + port)
 	err = http.ListenAndServe(port, h)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error starting server")
+		log.Fatal().Err(err).Msg("start server")
 	}
 }

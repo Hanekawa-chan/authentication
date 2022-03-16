@@ -1,6 +1,10 @@
 package dao
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"authentication/models"
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 type auth struct {
 	db *mongo.Client
@@ -8,4 +12,10 @@ type auth struct {
 
 func New(db *mongo.Client) Auth {
 	return &auth{db: db}
+}
+
+func (a *auth) CreateRefresh(ctx context.Context, user *models.Credentials) error {
+	const op = "dao.Auth.CreateRefresh"
+	// добавить рефреш токен в бд
+	return nil
 }

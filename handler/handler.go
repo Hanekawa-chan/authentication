@@ -7,12 +7,13 @@ import (
 
 type AuthHandler struct {
 	*mux.Router
-	db dao.Auth
+	db        dao.Auth
+	generator *Generator
 }
 
-func NewAuthHandler(db dao.Auth) *AuthHandler {
+func NewAuthHandler(db dao.Auth, gen *Generator) *AuthHandler {
 	r := mux.NewRouter()
-	h := &AuthHandler{r, db}
+	h := &AuthHandler{r, db, gen}
 	r.Queries("id", "{id}").Path("/auth").HandlerFunc(h.Authorize)
 	r.Path("/refresh").HandlerFunc(h.Refresh)
 	return h
