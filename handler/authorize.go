@@ -12,27 +12,28 @@ import (
 	"net/http"
 )
 
-type Response struct {
-	Jwt     string `json:"jwt_token,omitempty"`
-	Refresh string `json:"refresh_token,omitempty"`
-}
-
 func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	guid, err := uuid.Parse(id)
 	if err != nil {
 		log.Log().Err(err).Msg("uuid parse")
+		WriteError(w, &ErrResponse{Err: err.Error()})
+		return
 	}
 
 	refresh, err := generateRefresh()
 	err = h.db.CreateRefresh(context.Background(), &models.Credentials{Id: guid.String(), Refresh: refresh})
 	if err != nil {
 		log.Log().Err(err).Msg("create refresh")
+		WriteError(w, &ErrResponse{Err: err.Error()})
+		return
 	}
 
 	jwt, err := h.generateJWT(guid, refresh)
 	if err != nil {
 		log.Log().Err(err).Msg("generate jwt")
+		WriteError(w, &ErrResponse{Err: err.Error()})
+		return
 	}
 
 	response := &Response{
@@ -44,6 +45,8 @@ func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
 	_, err = w.Write(res)
 	if err != nil {
 		log.Log().Err(err).Msg("write")
+		WriteError(w, &ErrResponse{Err: err.Error()})
+		return
 	}
 }
 

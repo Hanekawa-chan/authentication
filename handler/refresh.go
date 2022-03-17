@@ -3,7 +3,6 @@ package handler
 import (
 	"authentication/models"
 	"context"
-	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
@@ -17,16 +16,22 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, req *http.Request) {
 		&models.Credentials{Refresh: refresh})
 	if err != nil {
 		log.Log().Err(err).Msg("replace refresh")
+		WriteError(w, &ErrResponse{Err: err.Error()})
+		return
 	}
 
 	guid, err := uuid.Parse(id)
 	if err != nil {
 		log.Log().Err(err).Msg("uuid parse")
+		WriteError(w, &ErrResponse{Err: err.Error()})
+		return
 	}
 
 	jwt, err := h.generateJWT(guid, refresh)
 	if err != nil {
 		log.Log().Err(err).Msg("generate jwt")
+		WriteError(w, &ErrResponse{Err: err.Error()})
+		return
 	}
 
 	response := &Response{
@@ -34,9 +39,5 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, req *http.Request) {
 		Refresh: refresh,
 	}
 
-	res, err := json.Marshal(response)
-	_, err = w.Write(res)
-	if err != nil {
-		log.Log().Err(err).Msg("write")
-	}
+	Write(w, response)
 }
