@@ -15,6 +15,6 @@ func NewAuthHandler(db dao.Auth, gen *Generator) *AuthHandler {
 	r := mux.NewRouter()
 	h := &AuthHandler{r, db, gen}
 	r.Queries("id", "{id}").Path("/auth").HandlerFunc(h.Authorize)
-	r.Path("/refresh").HandlerFunc(h.Refresh)
+	r.Queries("token", "{token}").Path("/refresh").HandlerFunc(h.Refresh)
 	return h
 }

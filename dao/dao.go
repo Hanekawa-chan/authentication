@@ -7,7 +7,8 @@ import (
 )
 
 type Auth interface {
-	CreateRefresh(ctx context.Context, user *models.Credentials) error
+	CreateRefresh(ctx context.Context, new *models.Credentials) error
+	ReplaceRefresh(ctx context.Context, last *models.Credentials, new *models.Credentials) (string, error)
 }
 
 var ErrNotFound = errors.New("not found")

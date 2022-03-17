@@ -24,15 +24,15 @@ func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
 		log.Log().Err(err).Msg("uuid parse")
 	}
 
-	jwt, err := h.generateJWT(guid)
-	if err != nil {
-		log.Log().Err(err).Msg("generate jwt")
-	}
-
 	refresh, err := generateRefresh()
-	err = h.db.CreateRefresh(context.Background(), &models.Credentials{Refresh: refresh})
+	err = h.db.CreateRefresh(context.Background(), &models.Credentials{Id: guid.String(), Refresh: refresh})
 	if err != nil {
 		log.Log().Err(err).Msg("create refresh")
+	}
+
+	jwt, err := h.generateJWT(guid, refresh)
+	if err != nil {
+		log.Log().Err(err).Msg("generate jwt")
 	}
 
 	response := &Response{
@@ -47,9 +47,10 @@ func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a *AuthHandler) generateJWT(userID uuid.UUID) (string, error) {
+func (a *AuthHandler) generateJWT(userID uuid.UUID, refresh string) (string, error) {
 	claims := make(map[string]interface{})
 	claims["user_id"] = userID
+	claims["refresh"] = refresh
 	token, err := a.generator.Generate(claims)
 	if err != nil {
 		return "", err

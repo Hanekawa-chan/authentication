@@ -24,7 +24,7 @@ func main() {
 		}
 	}()
 
-	authDao := dao.New(client)
+	authDao := dao.New(client.Database("auth"))
 
 	generator, err := handler.New("pass")
 	if err != nil {
