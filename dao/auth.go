@@ -4,6 +4,7 @@ import (
 	"authentication/models"
 	"context"
 	"github.com/rs/zerolog/log"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -17,22 +18,27 @@ func New(db *mongo.Database) Auth {
 
 func (a *auth) CreateRefresh(ctx context.Context, new *models.Credentials) error {
 	// добавить рефреш токен в бд
-	_, err := a.db.Collection("credentials").InsertOne(ctx, new)
+	res := a.db.Collection("credentials").FindOne(ctx, bson.D{{"id", new.Id}})
+	var err error
+	if res.Err() != nil {
+		_, err = a.db.Collection("credentials").InsertOne(ctx, new)
+	} else {
+		return ErrAlreadyExists
+	}
 	return err
 }
 
 func (a *auth) ReplaceRefresh(ctx context.Context, last *models.Credentials, new *models.Credentials) (string, error) {
 	// добавить рефреш токен в бд
-	res := a.db.Collection("credentials").FindOne(ctx, last)
-	if res.Err() != nil {
-		return "", res.Err()
-	}
-	id, err := res.DecodeBytes()
-	log.Log().Msg(id.String())
-	_, err := a.db.Collection("credentials").ReplaceOne(ctx, last, new)
+	temp := &models.Credentials{}
+	err := a.db.Collection("credentials").FindOne(ctx,
+		bson.D{{"refresh", last.Refresh}}).Decode(temp)
 	if err != nil {
+		log.Log().Msg("no result")
 		return "", err
 	}
-	_, err = a.db.Collection("credentials").InsertOne(ctx, new)
+	id := temp.Id
+	new.Id = id
+	_, err = a.db.Collection("credentials").ReplaceOne(ctx, bson.D{{"refresh", last.Refresh}}, new)
 	return id, err
 }

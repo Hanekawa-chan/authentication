@@ -4,6 +4,7 @@ import (
 	"authentication/models"
 	"context"
 	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -12,10 +13,15 @@ import (
 func (h *AuthHandler) Refresh(w http.ResponseWriter, req *http.Request) {
 	token := mux.Vars(req)["token"]
 	refresh, err := generateRefresh()
-	id, err = h.db.ReplaceRefresh(context.Background(), &models.Credentials{Refresh: token},
+	id, err := h.db.ReplaceRefresh(context.Background(), &models.Credentials{Refresh: token},
 		&models.Credentials{Refresh: refresh})
 	if err != nil {
 		log.Log().Err(err).Msg("replace refresh")
+	}
+
+	guid, err := uuid.Parse(id)
+	if err != nil {
+		log.Log().Err(err).Msg("uuid parse")
 	}
 
 	jwt, err := h.generateJWT(guid, refresh)

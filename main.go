@@ -39,3 +39,6 @@ func main() {
 		log.Fatal().Err(err).Msg("start server")
 	}
 }
+
+//http://localhost:8080/auth?id=4428bdb1-f9b6-44bc-9467-f1463f32926c
+//http://localhost:8080/refresh?refresh=
