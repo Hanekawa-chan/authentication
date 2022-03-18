@@ -1,8 +1,7 @@
 db_build:
 	sudo docker-compose up --build -d mongodb
-db_run:
-	sudo docker-compose up
+db_stop:
+	sudo docker-compose down
 go_run:
 	go run main.go
-run:
-	db_build db_run go_run
+run: db_build go_run
