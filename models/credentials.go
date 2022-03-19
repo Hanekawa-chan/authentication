@@ -1,6 +1,6 @@
 package models
 
 type Credentials struct {
-	Id      string
+	UserId  string
 	Refresh string
 }

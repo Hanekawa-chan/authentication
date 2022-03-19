@@ -18,7 +18,7 @@ func New(db *mongo.Database) Auth {
 
 func (a *auth) CreateRefresh(ctx context.Context, new *models.Credentials) error {
 	// добавить рефреш токен в бд
-	res := a.db.Collection("credentials").FindOne(ctx, bson.D{{"id", new.Id}})
+	res := a.db.Collection("credentials").FindOne(ctx, bson.D{{"id", new.UserId}})
 	var err error
 	if res.Err() != nil {
 		_, err = a.db.Collection("credentials").InsertOne(ctx, new)
@@ -37,8 +37,8 @@ func (a *auth) ReplaceRefresh(ctx context.Context, last *models.Credentials, new
 		log.Log().Msg("no result")
 		return "", err
 	}
-	id := temp.Id
-	new.Id = id
+	id := temp.UserId
+	new.UserId = id
 	_, err = a.db.Collection("credentials").ReplaceOne(ctx, bson.D{{"refresh", last.Refresh}}, new)
 	return id, err
 }

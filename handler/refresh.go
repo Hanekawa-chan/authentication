@@ -27,7 +27,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	jwt, err := h.generateJWT(guid, refresh)
+	jwt, err := h.generateJWT(guid)
 	if err != nil {
 		log.Log().Err(err).Msg("generate jwt")
 		WriteError(w, &ErrResponse{Err: err.Error()})

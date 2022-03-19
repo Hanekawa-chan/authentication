@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"time"
 )
 
 func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
@@ -22,14 +23,14 @@ func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
 	}
 
 	refresh, err := generateRefresh()
-	err = h.db.CreateRefresh(context.Background(), &models.Credentials{Id: guid.String(), Refresh: refresh})
+	err = h.db.CreateRefresh(context.Background(), &models.Credentials{UserId: guid.String(), Refresh: refresh})
 	if err != nil {
 		log.Log().Err(err).Msg("create refresh")
 		WriteError(w, &ErrResponse{Err: err.Error()})
 		return
 	}
 
-	jwt, err := h.generateJWT(guid, refresh)
+	jwt, err := h.generateJWT(guid)
 	if err != nil {
 		log.Log().Err(err).Msg("generate jwt")
 		WriteError(w, &ErrResponse{Err: err.Error()})
@@ -50,10 +51,10 @@ func (h *AuthHandler) Authorize(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (a *AuthHandler) generateJWT(userID uuid.UUID, refresh string) (string, error) {
+func (a *AuthHandler) generateJWT(userID uuid.UUID) (string, error) {
 	claims := make(map[string]interface{})
 	claims["user_id"] = userID
-	claims["refresh"] = refresh
+	claims["iat"] = time.Now().UnixNano()
 	token, err := a.generator.Generate(claims)
 	if err != nil {
 		return "", err
